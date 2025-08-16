@@ -67,6 +67,11 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('restart', () => {
+        game.restart();
+        io.emit('state', game.getState());
+    });
+
     socket.on('disconnect', () => {
         console.log('Client disconnected');
     });

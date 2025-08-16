@@ -16,10 +16,12 @@ function App() {
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const gameStateRef = useRef<GameState | null>(null);
+  const [isRestarting, setIsRestarting] = useState(false);
   const URL =
   import.meta.env.VITE_SOCKET_URL ??
   `${window.location.protocol}//${window.location.hostname}:3001`;
+
+  const gameStateRef = useRef<GameState | null>(null);
 
   useEffect(() => {
     const newSocket = io(URL);
@@ -68,6 +70,7 @@ function App() {
       const result = await leaderboardService.submitScore(nickname, finalScore, sessionId);
       console.log('Score submitted:', result);
       setShowNicknameModal(false);
+      startRestartCountdown();
     } catch (error) {
       console.error('Failed to submit score:', error);
       setShowNicknameModal(false);
@@ -76,6 +79,18 @@ function App() {
 
   const handleSkipScore = () => {
     setShowNicknameModal(false);
+  };
+
+  const startRestartCountdown = () => {
+    setIsRestarting(true);
+    
+    // Show restart countdown for 3 seconds
+    setTimeout(() => {
+      if (socket) {
+        socket.emit('restart');
+        setIsRestarting(false);
+      }
+    }, 3000);
   };
 
   if (!connected) {
@@ -93,6 +108,21 @@ function App() {
         gameOver={gameState.gameOver}
         onShowLeaderboard={() => setShowLeaderboardModal(true)}
       />
+
+      {isRestarting && (
+        <div className="restart-overlay">
+          <div className="restart-message">
+            <h2>Game Over!</h2>
+            <p>Restarting in 3 seconds...</p>
+            <div className="restart-countdown">
+              <div className="countdown-circle">
+                <span>3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <GameBoard 
         board={gameState.board}
         turn={gameState.turn}

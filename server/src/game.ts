@@ -22,6 +22,15 @@ export class Game {
         return this.state;
     }
 
+    restart(): void {
+        this.state = {
+          board: this.generateValidBoard(),
+          score: 0,
+          turn: 0,
+          gameOver: false
+        };
+      }
+
     private generateValidBoard(): Cell[][] {
         const board: Cell[][] = [];
 
