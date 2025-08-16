@@ -45,6 +45,13 @@ Score points by clicking cells on a 3×6 grid. Each click changes both the shape
    ```bash
    npm run dev
    ```
+### Docker Support
+
+The project includes Docker configuration for easy deployment:
+
+```bash
+docker-compose up --build
+```
 
 ## Project Structure
 ```bash
@@ -100,12 +107,6 @@ Silverfort-game/
    - View top scores and player rankings
    - See grouped scores from multiplayer sessions
 
-### Docker Support
 
-The project includes Docker configuration for easy deployment:
-
-```bash
-docker-compose up --build
-```
 
 **Enjoy playing Silverfort Game!** 🎮✨

@@ -79,6 +79,14 @@ function App() {
 
   const handleSkipScore = () => {
     setShowNicknameModal(false);
+    setIsRestarting(true);
+    // Show restart countdown for 3 seconds
+    setTimeout(() => {
+      if (socket) {
+        socket.emit('restart');
+        setIsRestarting(false);
+      }
+    }, 3000);
   };
 
   const startRestartCountdown = () => {
@@ -93,6 +101,10 @@ function App() {
     }, 3000);
   };
 
+  useEffect(() => {
+    document.title = 'Silverfort Shared Game';
+  }, []);
+
   if (!connected) {
     return <div className="loading">Connecting to server...</div>;
   }
@@ -100,6 +112,7 @@ function App() {
   if (!gameState) {
     return <div className="loading">Loading game...</div>;
   }
+
 
   return (
     <div className="app">

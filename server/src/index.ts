@@ -27,6 +27,10 @@ app.use(express.static('../client/dist'));
 const game = new Game();
 const leaderboard = new Leaderboard();
 
+// Track restart state
+let isRestarting = false;
+let restartTimeout: NodeJS.Timeout | null = null;
+
 // REST endpoints for leaderboard
 app.get('/api/leaderboard', (req, res) => {
     res.json(leaderboard.getLeaderboard());
@@ -55,6 +59,10 @@ io.on('connection', (socket) => {
     socket.emit('state', game.getState());
 
     socket.on('clickCell', (data: ClickCellData) => {
+        if (isRestarting) {
+            return;
+        }
+
         const result = game.clickCell(data.row, data.col);
 
         if (result.success) {
@@ -68,8 +76,25 @@ io.on('connection', (socket) => {
     });
 
     socket.on('restart', () => {
-        game.restart();
-        io.emit('state', game.getState());
+        if (isRestarting) {
+            return;
+        }
+        isRestarting = true;
+        // Clear any existing restart timeout
+        if (restartTimeout) {
+            clearTimeout(restartTimeout);
+        }
+        // Notify all clients that restart is happening
+        io.emit('restartStarted');
+        
+        // Set timeout for actual restart
+        restartTimeout = setTimeout(() => {
+            game.restart();
+            isRestarting = false;
+            restartTimeout = null;
+            io.emit('restartCompleted');
+            io.emit('state', game.getState());
+        }, 3000);
     });
 
     socket.on('disconnect', () => {
