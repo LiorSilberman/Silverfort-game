@@ -1,0 +1,79 @@
+.game-cell {
+  width: 80px;
+  height: 80px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.game-cell:hover:not(.disabled) {
+  border-color: #3498db;
+  transform: scale(1.05);
+}
+
+.game-cell.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.cooldown-overlay {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .game-cell {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .cooldown-overlay {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  .game-cell {
+    width: 50px;
+    height: 50px;
+    border-width: 1px;
+  }
+  
+  .cooldown-overlay {
+    width: 15px;
+    height: 15px;
+    font-size: 8px;
+    top: 2px;
+    right: 2px;
+  }
+}
+
+/* Extra small mobile */
+@media (max-width: 360px) {
+  .game-cell {
+    width: 45px;
+    height: 45px;
+  }
+}

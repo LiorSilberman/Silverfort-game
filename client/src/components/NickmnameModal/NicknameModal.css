@@ -1,0 +1,167 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 100%;
+}
+
+.modal h2 {
+  margin: 0 0 15px 0;
+  color: #333;
+  text-align: center;
+}
+
+.modal p {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal label {
+  font-weight: bold;
+  color: #555;
+}
+
+.modal input {
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal input:focus {
+  border-color: #3498db;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-buttons button:first-child {
+  background: #27ae60;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover:not(:disabled) {
+  background: #229954;
+}
+
+.modal-buttons button:first-child:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.modal-buttons button:last-child {
+  background: #95a5a6;
+  color: white;
+}
+
+.modal-buttons button:last-child:hover {
+  background: #7f8c8d;
+}
+
+/* Tablet styles */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 15px;
+  }
+  
+  .modal {
+    padding: 25px;
+  }
+  
+  .modal h2 {
+    font-size: 20px;
+  }
+  
+  .modal p {
+    font-size: 16px;
+  }
+  
+  .modal input {
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .modal-buttons button {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 10px;
+  }
+  
+  .modal {
+    padding: 20px;
+  }
+  
+  .modal h2 {
+    font-size: 18px;
+  }
+  
+  .modal p {
+    font-size: 14px;
+  }
+  
+  .modal form {
+    gap: 12px;
+  }
+  
+  .modal input {
+    padding: 8px;
+    font-size: 14px;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-buttons button {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
