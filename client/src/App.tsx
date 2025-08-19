@@ -119,7 +119,7 @@ function App() {
         onShowLeaderboard={() => setShowLeaderboardModal(true)}
       />
 
-      {restartCountdown && !showNicknameModal && (
+      {restartCountdown && (
         <div className="restart-overlay">
           <div className="restart-message">
             <h2>Game Over!</h2>
