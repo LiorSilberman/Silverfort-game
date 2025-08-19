@@ -78,7 +78,7 @@ export class Leaderboard {
 
     // Add player to session
     session.players.push(entry);
-    session.totalScore += score;
+    session.totalScore = score;
 
     // Update global leaderboard with session data
     this.updateLeaderboardWithSessions();

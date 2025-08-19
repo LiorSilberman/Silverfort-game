@@ -21,3 +21,8 @@ export interface LeaderboardEntry {
     score: number;
     timestamp: number;
 }
+
+export interface RestartCountdownData {
+    secondsRemaining: number;
+    message: string;
+}

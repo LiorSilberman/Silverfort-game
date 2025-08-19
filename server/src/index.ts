@@ -5,7 +5,7 @@ import cors from 'cors';
 import { Game } from './game.js';
 import dotenv from 'dotenv'
 import { Leaderboard } from './leaderboard.js';
-import { SubmitScoreData, ClickCellData } from './types.js';
+import { SubmitScoreData, ClickCellData, RestartCountdownData } from './types.js';
 
 dotenv.config()
 
@@ -30,6 +30,63 @@ const leaderboard = new Leaderboard();
 // Track restart state
 let isRestarting = false;
 let restartTimeout: NodeJS.Timeout | null = null;
+let countdownInterval: NodeJS.Timeout | null = null;
+
+// Auto-restart function with grace period for score submission
+function scheduleAutoRestart(delayMs: number = 8000) {
+    if (isRestarting) return;
+    
+    isRestarting = true;
+    const totalSeconds = delayMs / 1000;
+    let remainingSeconds = totalSeconds;
+    
+    console.log(`Game over! Auto-restarting in ${totalSeconds} seconds...`);
+    
+    // Send initial countdown
+    const countdownData: RestartCountdownData = { 
+        secondsRemaining: remainingSeconds,
+        message: 'Submit your scores! Game restarts in...'
+    };
+    io.emit('restartCountdown', countdownData);
+    
+    // Update countdown every second
+    countdownInterval = setInterval(() => {
+        remainingSeconds--;
+        if (remainingSeconds > 0) {
+            const countdownUpdate: RestartCountdownData = { 
+                secondsRemaining: remainingSeconds,
+                message: 'Submit your scores! Game restarts in...'
+            };
+            io.emit('restartCountdown', countdownUpdate);
+        }
+    }, 1000);
+    
+    // Final restart
+    restartTimeout = setTimeout(() => {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        game.restart();
+        isRestarting = false;
+        restartTimeout = null;
+        console.log('Game restarted automatically');
+        io.emit('restartCompleted');
+        io.emit('state', game.getState());
+    }, delayMs);
+}
+
+function cancelAutoRestart() {
+    if (restartTimeout) {
+        clearTimeout(restartTimeout);
+        restartTimeout = null;
+    }
+    if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+    }
+    isRestarting = false;
+}
 
 // REST endpoints for leaderboard
 app.get('/api/leaderboard', (req, res) => {
@@ -72,29 +129,21 @@ io.on('connection', (socket) => {
             const sessionId = leaderboard.startNewSession();
             io.emit('gameOver', { sessionId });
             io.emit('state', game.getState());
+            
+            // Automatically schedule restart with 8-second grace period
+            scheduleAutoRestart(8000);
         }
     });
 
-    socket.on('restart', () => {
-        if (isRestarting) {
-            return;
-        }
-        isRestarting = true;
-        // Clear any existing restart timeout
-        if (restartTimeout) {
-            clearTimeout(restartTimeout);
-        }
-        // Notify all clients that restart is happening
-        io.emit('restartStarted');
+    // Manual force restart (for admin/testing purposes)
+    socket.on('forceRestart', () => {
+        console.log('Force restart requested');
         
-        // Set timeout for actual restart
-        restartTimeout = setTimeout(() => {
-            game.restart();
-            isRestarting = false;
-            restartTimeout = null;
-            io.emit('restartCompleted');
-            io.emit('state', game.getState());
-        }, 3000);
+        // Cancel any pending auto-restart
+        cancelAutoRestart();
+        
+        // Immediate restart with short delay
+        scheduleAutoRestart(1000);
     });
 
     socket.on('disconnect', () => {

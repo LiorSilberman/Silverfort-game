@@ -39,3 +39,8 @@ export interface GameSession {
   gameOverAt: number;
   totalScore: number;
 }
+
+export interface RestartCountdownData {
+  secondsRemaining: number;
+  message: string;
+}

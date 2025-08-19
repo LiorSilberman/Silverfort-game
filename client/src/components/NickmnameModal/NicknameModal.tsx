@@ -5,9 +5,10 @@ interface NicknameModalProps {
   score: number;
   onSubmit: (nickname: string) => void;
   onCancel: () => void;
+  countdownSeconds?: number;
 }
 
-export default function NicknameModal({ score, onSubmit, onCancel }: NicknameModalProps) {
+export default function NicknameModal({ score, onSubmit, onCancel, countdownSeconds }: NicknameModalProps) {
   const [nickname, setNickname] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -22,6 +23,11 @@ export default function NicknameModal({ score, onSubmit, onCancel }: NicknameMod
       <div className="modal">
         <h2>Game Over!</h2>
         <p>Your score: {score}</p>
+        {countdownSeconds && countdownSeconds > 0 && (
+          <p className="countdown-warning">
+            ⏰ Game restarts in {countdownSeconds} seconds
+          </p>
+        )}
         <form onSubmit={handleSubmit}>
           <label htmlFor="nickname">Enter your nickname:</label>
           <input

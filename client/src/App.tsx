@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { GameState } from './types';
+import type { GameState, RestartCountdownData } from './types';
 import GameBoard from './components/GameBoard/GameBoard';
 import GameHeader from './components/GameHeader/GameHeader';
 import NicknameModal from './components/NickmnameModal/NicknameModal';
@@ -16,7 +16,14 @@ function App() {
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [isRestarting, setIsRestarting] = useState(false);
+  const [restartCountdown, setRestartCountdown] = useState<RestartCountdownData | null>(null);
+
+  // Use useCallback to prevent unnecessary re-renders
+  const handleRestartCountdown = useCallback((data: RestartCountdownData) => {
+      console.log(`Restart countdown: ${data.secondsRemaining} seconds remaining`);
+      setRestartCountdown(data);
+  }, []);
+
   const URL =
   import.meta.env.VITE_SOCKET_URL ??
   `${window.location.protocol}//${window.location.hostname}:3001`;
@@ -51,6 +58,15 @@ function App() {
       }
     });
 
+    newSocket.on('restartCountdown', handleRestartCountdown);
+
+    newSocket.on('restartCompleted', () => {
+      console.log('Game restarted by server');
+      setRestartCountdown(null);
+      setShowNicknameModal(false);
+      setCurrentSessionId(null);
+    });
+
     setSocket(newSocket);
 
     return () => {
@@ -70,7 +86,7 @@ function App() {
       const result = await leaderboardService.submitScore(nickname, finalScore, sessionId);
       console.log('Score submitted:', result);
       setShowNicknameModal(false);
-      startRestartCountdown();
+      // Server will handle restart automatically - no client action needed
     } catch (error) {
       console.error('Failed to submit score:', error);
       setShowNicknameModal(false);
@@ -79,26 +95,7 @@ function App() {
 
   const handleSkipScore = () => {
     setShowNicknameModal(false);
-    setIsRestarting(true);
-    // Show restart countdown for 3 seconds
-    setTimeout(() => {
-      if (socket) {
-        socket.emit('restart');
-        setIsRestarting(false);
-      }
-    }, 3000);
-  };
-
-  const startRestartCountdown = () => {
-    setIsRestarting(true);
-    
-    // Show restart countdown for 3 seconds
-    setTimeout(() => {
-      if (socket) {
-        socket.emit('restart');
-        setIsRestarting(false);
-      }
-    }, 3000);
+    // Server will handle restart automatically - no client action needed
   };
 
   useEffect(() => {
@@ -122,14 +119,14 @@ function App() {
         onShowLeaderboard={() => setShowLeaderboardModal(true)}
       />
 
-      {isRestarting && (
+      {restartCountdown && !showNicknameModal && (
         <div className="restart-overlay">
           <div className="restart-message">
             <h2>Game Over!</h2>
-            <p>Restarting in 3 seconds...</p>
+            <p>{restartCountdown.message}</p>
             <div className="restart-countdown">
               <div className="countdown-circle">
-                <span>3</span>
+                <span>{restartCountdown.secondsRemaining}</span>
               </div>
             </div>
           </div>
@@ -147,6 +144,7 @@ function App() {
           score={finalScore} 
           onSubmit={handleSubmitScore} 
           onCancel={handleSkipScore}
+          countdownSeconds={restartCountdown?.secondsRemaining}
         />
       )}
       {showLeaderboardModal && (
